@@ -383,8 +383,19 @@ DAISIE_loglik_CS_M1 <- DAISIE_loglik <- function(pars1,
       # (stac 2, 3, 4), the first branching point (stac = 6, 7), to the maximum colonization
       # time (stac = 1, 5, 8, 9) or to the present (stac = 0)
       probs = rep(0,2 * lx + 1)
-      probs[1] = 1
-      k1 = 0
+
+      if(stac == 0 | brts[1] != brts[2])
+      {
+        # TODO: specify what p is
+        probs[1] <- 1 - p
+        probs[2] <- p
+        k1 <- 0
+      } else
+      {
+        probs[1] <- 1
+        k1 <- 1
+      }
+
       #y = deSolve::ode(probs,brts[1:2],DAISIE_loglik_rhs,c(pars1,k1,ddep),rtol = reltolint,atol = abstolint,method = methode)
       y = DAISIE_integrate(probs,brts[1:2],DAISIE_loglik_rhs,c(pars1,k1,ddep),rtol = reltolint,atol = abstolint,method = methode)
       probs = y[2,2:(2 * lx + 2)]
