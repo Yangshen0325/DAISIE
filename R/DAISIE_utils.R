@@ -462,3 +462,112 @@ create_CS_version <- function(model = 1,
   return(CS_version)
 }
 
+#' Simulates mainland extinction as a pure-death process with replacement
+#' either via dispersal of a new species into the mainland species pool or via
+#' the speciation of an exisiting mainland species.
+#'
+#' @param time numeric determing duration of the simulation in million years
+#' @param M  numeric determining size of the mainland species pool
+#' @param mu_m numeric determining mainland extinction rate in extinction
+#' events per lineage per million years.
+#' @param replacement string of either "dispersal" or "speciation".
+#'
+#' @return a list
+mainland_extinction <- function(
+  time,
+  M,
+  mu_m,
+  replacement
+) {
+  total_time <- time
+  time <- 0
+  extinction_times <- c()
+  mainland <- vector("list", M)
+  for (i in seq_along(mainland)) {
+    mainland[[i]] <- list(colonisation_time = total_time,
+                          extinction_time = c(),
+                          speciation_time = c())
+  }
+
+  # Poisson point process
+  time <- rexp(n = 1, rate = M * mu_m)
+  while (time < total_time) {
+    extinction_times <- append(extinction_times, total_time - time)
+    time <- time + rexp(n = 1, rate = M * mu_m)
+  }
+
+  if (replacement == "dispersal") {
+    # Randomly assigning extinction times to species and colonisations
+    mainland_pool <- 1:M
+    for (i in seq_along(extinction_times)) {
+      sampled_species <- sample(mainland_pool, 1)
+      mainland[[sampled_species]]$extinction_time <- extinction_times[i]
+      mainland_pool <- mainland_pool[-which(mainland_pool == sampled_species)]
+      mainland_pool <- c(mainland_pool, M + i)
+      mainland[[length(mainland) + 1]] <- list(
+        colonisation_time = extinction_times[i],
+        extinction_time = c(),
+        speciation_time = c())
+    }
+  }
+  if (replacement == "speciation") {
+    # Randomly assigning extinction times to species and branching times
+    mainland_pool <- 1:M
+    for (i in seq_along(extinction_times)) {
+      sampled_species <- sample(mainland_pool, 1)
+      mainland[[sampled_species]]$extinction_time <-
+        c(mainland[[sampled_species]]$extinction_time, extinction_times[i])
+      if (is.null(mainland[[sampled_species]]$speciation_time)) {
+        mainland_pool <- mainland_pool[-which(mainland_pool == sampled_species)]
+      }
+      probs <- c()
+      for (j in mainland_pool) {
+        probs[j] <- length(mainland[[j]]$speciation) + 1
+        probs <- na.omit(probs)
+      }
+      sampled_speciation <- sample(mainland_pool, 1, prob = probs)
+      mainland[[sampled_speciation]]$speciation_time <-
+        c(mainland[[sampled_speciation]]$speciation_time, extinction_times[i])
+    }
+  }
+  return(mainland)
+}
+
+#' Checks the island is consistent with the mainland
+#'
+#' @param mainland_lineage list with three elements of extinction_time,
+#' colonisation_time and speciation_time
+#' @param island_lineage list with four elements stt_table, branching_times,
+#' stac and missing_species
+#'
+#' @return boolean
+check_island_mainland <- function(total_time,
+                                  mainland_lineage,
+                                  island_lineage) {
+  stt <- island_lineage$stt_table
+  if (is.null(mainland_lineage$extinction_time)) {
+    extinction_time <- 0
+  }
+
+  if (nrow(stt) == 3) {
+    stt <- stt[-nrow(stt), ]
+  }
+  if (nrow(stt) > 3) {
+    stt <- stt[-1, ]
+    stt <- stt[-nrow(stt), ]
+  }
+  if (all(stt[, "nI"] == 0)) {
+    return(TRUE)
+  } else if (all(mainland_lineage$colonisation_time >
+                 as.numeric(stt[which(diff(stt[, "nI"]) == 1) + 1, "Time"])) &&
+             all(mainland_lineage$colonisation_time >
+                 stt[which(duplicated(stt[, 2:4])), "Time"]) &&
+             all(mainland_lineage$extinction_time <
+                 as.numeric(stt[which(diff(stt[, "nI"]) == 1) + 1, "Time"])) &&
+             all(mainland_lineage$extinction_time <
+                 stt[which(duplicated(stt[, 2:4])), "Time"])) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
