@@ -472,102 +472,190 @@ create_CS_version <- function(model = 1,
 #' events per lineage per million years.
 #' @param replacement string of either "dispersal" or "speciation".
 #'
-#' @return a list
-mainland_extinction <- function(
+#' @return a list where each element is a mainland lineage, this could be a
+#' single lineage in the case of replacement by dispersal or a single or
+#' multiple lineages in the case of replacement by speciation. Each element of
+#' the list is a matrix with nine columns. The columns contain
+#' \enumerate{
+#'     \item Species identity
+#'     \item Mainland ancestor identity
+#'     \item Colonisation time
+#'     \item Species type
+#'     \item Branching code
+#'     \item Branching time (forwards in time from the start of the simulation)
+#'     \item Anagenetic origin
+#'     \item Species origination time
+#'     \item Species extinction time
+#' }
+#' @keywords internal
+sim_mainland <- function(
   time,
   M,
   mu_m,
   replacement
 ) {
-  total_time <- time
+  totaltime <- time
   time <- 0
-  extinction_times <- c()
-  mainland <- vector("list", M)
-  for (i in seq_along(mainland)) {
-    mainland[[i]] <- list(colonisation_time = total_time,
-                          extinction_time = c(),
-                          speciation_time = c())
+  maxspecID <- M
+  mainland <- list()
+  for (i in 1:M) {
+    mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA))
   }
-
-  # Poisson point process
   time <- rexp(n = 1, rate = M * mu_m)
-  while (time < total_time) {
-    extinction_times <- append(extinction_times, total_time - time)
+  while (time < totaltime) {
+    #EXTINCTION
+    spec_id_num <- c()
+    spec_id_let <- c()
+    for (i in seq_along(mainland)) {
+      spec_id_num <- as.numeric(c(spec_id_num, mainland[[i]][, 1]))
+      spec_id_let <- c(spec_id_let, mainland[[i]][, 4])
+    }
+    if (any(spec_id_let == "E")) {
+      spec_id_num <- spec_id_num[-which(spec_id_let == "E")]
+    }
+    extinct_spec <- DDD::sample2(spec_id_num, 1)
+    lineage <- c()
+    for (i in seq_along(mainland)) {
+      lineage[i] <- any(as.numeric(mainland[[i]][, 1]) == extinct_spec)
+    }
+    lineage <- which(lineage)
+    extinct <- which(mainland[[lineage]][, 1] == extinct_spec)
+    typeofspecies <- mainland[[lineage]][extinct, 4]
+    if (typeofspecies == "I") {
+      mainland[[lineage]][extinct, 4] <- "E"
+      mainland[[lineage]][extinct, 9] <- time
+    }
+    if (typeofspecies == "A") {
+      mainland[[lineage]][extinct, 4] <- "E"
+      mainland[[lineage]][extinct, 9] <- time
+    }
+    if (typeofspecies == "C") {
+      #first find species with same ancestor AND arrival totaltime
+      sisters <- intersect(which(mainland[[lineage]][, 2] ==
+                                   mainland[[lineage]][extinct, 2]),
+                           which(mainland[[lineage]][, 3] ==
+                                   mainland[[lineage]][extinct, 3]))
+      survivors <- sisters[which(sisters != extinct)]
+      if (length(sisters) == 2) {
+        #survivors status becomes anagenetic
+        mainland[[lineage]][survivors, 4] <- "A"
+        mainland[[lineage]][survivors, 7] <- "Clado_extinct"
+        mainland[[lineage]][extinct, 4] <- "E"
+        mainland[[lineage]][extinct, 9] <- time
+      }
+
+      if (length(sisters) >= 3) {
+        numberofsplits <- nchar(mainland[[lineage]][extinct, 5])
+        mostrecentspl <- substring(mainland[[lineage]][extinct, 5],
+                                   numberofsplits)
+
+        if (mostrecentspl == "B") {
+          sistermostrecentspl <- "A"
+        }
+        if (mostrecentspl == "A") {
+          sistermostrecentspl <- "B"
+        }
+        motiftofind <- paste(substring(
+          mainland[[lineage]][extinct, 5],
+          1,
+          numberofsplits - 1),
+          sistermostrecentspl,
+          sep = "")
+        possiblesister <- survivors[which(substring(
+          mainland[[lineage]][survivors, 5],
+          1,
+          numberofsplits) == motiftofind)]
+        #different rules depending on whether a B or A is removed.
+        #B going extinct is simpler because it only
+        #carries a record of the most recent speciation
+        if (mostrecentspl == "A") {
+          #change the splitting date of the sister species so that it inherits
+          #the early splitting that used to belong to A.
+          # Bug fix here thanks to Nadiah Kristensen: max -> min
+          tochange <-
+            possiblesister[which(
+              mainland[[lineage]][possiblesister, 6] ==
+                min(as.numeric(mainland[[lineage]][possiblesister, 6])))]
+          mainland[[lineage]][tochange, 6] <-
+            mainland[[lineage]][extinct, 6]
+        }
+        #change the offending A/B from these species to E
+        mainland[[lineage]][extinct, 4] <- "E"
+        mainland[[lineage]][extinct, 9] <- time
+      }
+    }
+    if (replacement == "dispersal") {
+      mainland[[length(mainland) + 1]] <-
+        rbind(c(length(mainland) + 1,
+                length(mainland) + 1,
+                time,
+                "I",
+                "A",
+                NA,
+                NA,
+                NA,
+                NA))
+    }
+    if (replacement == "speciation") {
+      spec_id_num <- c()
+      spec_id_let <- c()
+      for (i in seq_along(mainland)) {
+        spec_id_num <- as.numeric(c(spec_id_num, mainland[[i]][, 1]))
+        spec_id_let <- c(spec_id_let, mainland[[i]][, 4])
+      }
+      if (any(spec_id_let == "E")) {
+        spec_id_num <- spec_id_num[-which(spec_id_let == "E")]
+      }
+      branch_spec <- DDD::sample2(spec_id_num, 1)
+      lineage <- c()
+      for (i in seq_along(mainland)) {
+        lineage[i] <- any(as.numeric(mainland[[i]][, 1]) == branch_spec)
+      }
+      lineage <- which(lineage)
+      tosplit <- which(mainland[[lineage]][, 1] == branch_spec)
+      #CLADOGENESIS - this splits species into two new species
+      #for daughter A
+      oldstatus <- mainland[[lineage]][tosplit, 5]
+      mainland[[lineage]][tosplit, 4] <- "E"
+      mainland[[lineage]][tosplit, 9] <- time
+      mainland[[lineage]] <- rbind(
+        mainland[[lineage]],
+        c(maxspecID + 1,
+          mainland[[lineage]][tosplit, 2],
+          mainland[[lineage]][tosplit, 3],
+          "C",
+          paste(oldstatus, "A", sep = ""),
+          time,
+          NA,
+          NA,
+          NA))
+      #for daughter B
+      mainland[[lineage]] <- rbind(
+        mainland[[lineage]],
+        c(maxspecID + 2,
+          mainland[[lineage]][tosplit, 2],
+          mainland[[lineage]][tosplit, 3],
+          "C",
+          paste(oldstatus, "B", sep = ""),
+          time,
+          NA,
+          NA,
+          NA))
+      maxspecID <- maxspecID + 2
+    }
     time <- time + rexp(n = 1, rate = M * mu_m)
   }
-
-  if (replacement == "dispersal") {
-    # Randomly assigning extinction times to species and colonisations
-    mainland_pool <- 1:M
-    for (i in seq_along(extinction_times)) {
-      sampled_species <- sample(mainland_pool, 1)
-      mainland[[sampled_species]]$extinction_time <- extinction_times[i]
-      mainland_pool <- mainland_pool[-which(mainland_pool == sampled_species)]
-      mainland_pool <- c(mainland_pool, M + i)
-      mainland[[length(mainland) + 1]] <- list(
-        colonisation_time = extinction_times[i],
-        extinction_time = c(),
-        speciation_time = c())
-    }
-  }
-  if (replacement == "speciation") {
-    # Randomly assigning extinction times to species and branching times
-    mainland_pool <- 1:M
-    for (i in seq_along(extinction_times)) {
-      sampled_species <- sample(mainland_pool, 1)
-      mainland[[sampled_species]]$extinction_time <-
-        c(mainland[[sampled_species]]$extinction_time, extinction_times[i])
-      if (is.null(mainland[[sampled_species]]$speciation_time)) {
-        mainland_pool <- mainland_pool[-which(mainland_pool == sampled_species)]
+  for (i in seq_along(mainland)) {
+    for (j in seq_len(nrow(mainland[[i]]))) {
+      if (is.na(mainland[[i]][j, 9])) {
+        mainland[[i]][j, 9] <- totaltime
       }
-      probs <- c()
-      for (j in mainland_pool) {
-        probs[j] <- length(mainland[[j]]$speciation) + 1
-        probs <- na.omit(probs)
+      if (is.na(mainland[[i]][j, 6])) {
+        mainland[[i]][j, 8] <- mainland[[i]][j, 3]
+      } else {
+        mainland[[i]][j, 8] <- mainland[[i]][j, 6]
       }
-      sampled_speciation <- sample(mainland_pool, 1, prob = probs)
-      mainland[[sampled_speciation]]$speciation_time <-
-        c(mainland[[sampled_speciation]]$speciation_time, extinction_times[i])
     }
   }
   return(mainland)
-}
-
-#' Checks the island is consistent with the mainland
-#'
-#' @param mainland_lineage list with three elements of extinction_time,
-#' colonisation_time and speciation_time
-#' @param island_lineage list with four elements stt_table, branching_times,
-#' stac and missing_species
-#'
-#' @return boolean
-check_island_mainland <- function(total_time,
-                                  mainland_lineage,
-                                  island_lineage) {
-  stt <- island_lineage$stt_table
-  if (is.null(mainland_lineage$extinction_time)) {
-    extinction_time <- 0
-  }
-
-  if (nrow(stt) == 3) {
-    stt <- stt[-nrow(stt), ]
-  }
-  if (nrow(stt) > 3) {
-    stt <- stt[-1, ]
-    stt <- stt[-nrow(stt), ]
-  }
-  if (all(stt[, "nI"] == 0)) {
-    return(TRUE)
-  } else if (all(mainland_lineage$colonisation_time >
-                 as.numeric(stt[which(diff(stt[, "nI"]) == 1) + 1, "Time"])) &&
-             all(mainland_lineage$colonisation_time >
-                 stt[which(duplicated(stt[, 2:4])), "Time"]) &&
-             all(mainland_lineage$extinction_time <
-                 as.numeric(stt[which(diff(stt[, "nI"]) == 1) + 1, "Time"])) &&
-             all(mainland_lineage$extinction_time <
-                 stt[which(duplicated(stt[, 2:4])), "Time"])) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
 }
