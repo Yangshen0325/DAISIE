@@ -597,3 +597,51 @@ calc_peak <- function(totaltime,
   return(peak)
 }
 
+#' Calculates algorithm rates for mainland extinction
+#' @description Internal function that updates the all the rates at time t.
+#' @family rate calculations
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @return a named list with the updated effective rates.
+update_rates_mainland_ex <- function(timeval,
+                                     totaltime,
+                                     gam,
+                                     laa,
+                                     lac,
+                                     mu,
+                                     K,
+                                     num_spec,
+                                     num_immigrants,
+                                     mainland_n,
+                                     island_spec = NULL) {
+  testit::assert(is.numeric(timeval))
+  testit::assert(is.numeric(totaltime))
+  testit::assert(is.numeric(gam))
+  testit::assert(is.numeric(laa))
+  testit::assert(is.numeric(lac))
+  testit::assert(is.numeric(mu))
+  testit::assert(is.numeric(K))
+  testit::assert(is.numeric(num_spec) || is.null(num_spec))
+  testit::assert(is.numeric(num_immigrants) || is.null(num_immigrants))
+  testit::assert(is.numeric(mainland_n))
+
+  immig_rate <- max(0, mainland_n * gam * (1 - (num_spec / K)))
+  ext_rate <- mu * num_spec
+  ana_rate <- laa * num_immigrants
+  clado_rate <- max(0, lac * num_spec * (1 - (num_spec / K)))
+
+  testit::assert(immig_rate >= 0.0)
+  testit::assert(ext_rate >= 0.0)
+  testit::assert(ana_rate >= 0.0)
+  testit::assert(clado_rate >= 0.0)
+
+  rates <- list(
+    immig_rate = immig_rate,
+    ext_rate = ext_rate,
+    ana_rate = ana_rate,
+    clado_rate = clado_rate
+  )
+  return(rates)
+}
