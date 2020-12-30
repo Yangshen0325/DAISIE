@@ -659,3 +659,20 @@ sim_mainland <- function(
   }
   return(mainland)
 }
+
+
+#' Checks if any changes on the mainland change the state of the island species
+#'
+#' @inheritParams default_params_doc
+#'
+#' @return matrix
+check_island_state <- function(timeval,
+                               island_spec,
+                               mainland) {
+  if (timeval > mainland[, 9] && any(island_spec[, 4] == "I")) {
+    immig_spec <- which(island_spec[, 4] == "I")
+    island_spec[immig_spec, 4] <- "A"
+    island_spec[immig_spec, 7] <- "mainland_extinction"
+  }
+  return(island_spec)
+}
