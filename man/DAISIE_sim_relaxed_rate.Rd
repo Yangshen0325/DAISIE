@@ -203,6 +203,7 @@ outputs.
 
 Other simulation models: 
 \code{\link{DAISIE_sim_constant_rate_shift}()},
+\code{\link{DAISIE_sim_mainland_ex}()},
 \code{\link{DAISIE_sim_time_dependent}()},
 \code{\link{DAISIE_sim}()}
 }

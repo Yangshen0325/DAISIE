@@ -125,7 +125,11 @@ default_params_doc(
   reltolint,
   pick,
   mean,
-  sd
+  sd,
+  island_pars,
+  mainland_ext,
+  replacement,
+  mu_m
 )
 }
 \arguments{
@@ -695,6 +699,23 @@ relaxed-rate model}
 \item{mean}{Numeric mean of the distribution}
 
 \item{sd}{Numeric standard deviation of the distribution}
+
+\item{island_pars}{A numeric vector containing the model parameters:
+\itemize{
+  \item{\code{pars[1]}: lambda^c (cladogenesis rate)}
+  \item{\code{pars[2]}: mu (extinction rate)}
+  \item{\code{pars[3]}: K (carrying capacity), set K=Inf for diversity
+  independence.}
+  \item{\code{pars[4]}: gamma (immigration rate)}
+  \item{\code{pars[5]}: lambda^a (anagenesis rate)}
+  }}
+
+\item{mainland_ext}{Numeric extinction rate on the mainland}
+
+\item{replacement}{String defining how replacement occurs on the mainland,
+either \code{'dispersal'} or \code{'speciation'}}
+
+\item{mu_m}{Numeric extinction rate on the mainland}
 }
 \value{
 Nothing
