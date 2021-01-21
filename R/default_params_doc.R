@@ -446,6 +446,19 @@
 #' relaxed-rate model
 #' @param mean Numeric mean of the distribution
 #' @param sd Numeric standard deviation of the distribution
+#' @param island_pars A numeric vector containing the model parameters:
+#'   \itemize{
+#'     \item{\code{pars[1]}: lambda^c (cladogenesis rate)}
+#'     \item{\code{pars[2]}: mu (extinction rate)}
+#'     \item{\code{pars[3]}: K (carrying capacity), set K=Inf for diversity
+#'     independence.}
+#'     \item{\code{pars[4]}: gamma (immigration rate)}
+#'     \item{\code{pars[5]}: lambda^a (anagenesis rate)}
+#'     }
+#' @param mainland_ext Numeric extinction rate on the mainland
+#' @param replacement String defining how replacement occurs on the mainland,
+#' either \code{'dispersal'} or \code{'speciation'}
+#' @param mu_m Numeric extinction rate on the mainland
 #' @keywords internal
 #' @note This is an internal function, so it should be marked with
 #'   \code{@noRd}. This is not done, as this will disallow all
@@ -573,7 +586,11 @@ default_params_doc <- function(
   reltolint,
   pick,
   mean,
-  sd
+  sd,
+  island_pars,
+  mainland_ext,
+  replacement,
+  mu_m
 ) {
   # Nothing
 }
