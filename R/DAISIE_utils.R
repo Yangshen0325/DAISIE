@@ -501,7 +501,7 @@ sim_mainland <- function(
   for (i in 1:M) {
     mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA))
   }
-  time <- rexp(n = 1, rate = M * mu_m)
+  time <- stats::rexp(n = 1, rate = M * mu_m)
   while (time < totaltime) {
     #EXTINCTION
     spec_id_num <- c()
@@ -643,7 +643,7 @@ sim_mainland <- function(
           NA))
       maxspecID <- maxspecID + 2
     }
-    time <- time + rexp(n = 1, rate = M * mu_m)
+    time <- time + stats::rexp(n = 1, rate = M * mu_m)
   }
   for (i in seq_along(mainland)) {
     for (j in seq_len(nrow(mainland[[i]]))) {
