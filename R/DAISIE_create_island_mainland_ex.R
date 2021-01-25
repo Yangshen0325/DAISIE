@@ -21,7 +21,8 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
   reality_island <- DAISIE_create_reality_island(stt_table = stt_table,
                                                  totaltime = totaltime,
                                                  island_spec = island_spec,
-                                                 mainland_n = mainland_n)
+                                                 mainland_n = mainland_n,
+                                                 mainland = mainland)
 
   return(list(ideal_island = ideal_island,
               reality_island = reality_island))
