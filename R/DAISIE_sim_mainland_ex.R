@@ -52,8 +52,7 @@
 #' @keywords models
 #' @examples
 #' ## Simulate 2 islands (replicates) for 1 million years, with a mainland
-#' ## extinction rate of 1 (SpMy^-1) and replacement in the mainland species
-#' ## pool with dispersal. Pool size 100.
+#' ## extinction rate of 1 (SpMy^-1). Pool size 100.
 #'
 #' set.seed(1)
 #' island_replicates <- DAISIE_sim_mainland_ex(
@@ -62,23 +61,6 @@
 #'   island_pars = c(1, 1, 10, 0.1, 1),
 #'   mainland_ext = 1,
 #'   replicates = 2,
-#'   replacement = "dispersal",
-#'   plot_sims = FALSE,
-#'   verbose = FALSE
-#' )
-#'
-#' ## Simulate 2 islands (replicates) for 1 million years, with a mainland
-#' ## extinction rate of 1 (SpMy^-1) and replacement in the mainland species
-#' ## pool with speciation. Pool size 100.
-#'
-#' set.seed(1)
-#' island_replicates <- DAISIE_sim_mainland_ex(
-#'   time = 1,
-#'   M = 100,
-#'   island_pars = c(1, 1, 10, 0.1, 1),
-#'   mainland_ext = 1,
-#'   replicates = 2,
-#'   replacement = "speciation",
 #'   plot_sims = FALSE,
 #'   verbose = FALSE
 #' )
@@ -91,23 +73,20 @@ DAISIE_sim_mainland_ex <- function(
   island_pars,
   mainland_ext,
   replicates,
-  replacement,
   sample_freq = 25,
   plot_sims = TRUE,
   verbose = TRUE,
   ...
 ) {
   testit::assert(is.numeric(time))
+  testit::assert(time > 0)
   testit::assert(is.numeric(M))
+  testit::assert(M > 1)
   testit::assert(is.numeric(island_pars))
   testit::assert(length(island_pars) == 5)
   testit::assert(is.numeric(mainland_ext))
   testit::assert(length(mainland_ext) == 1)
   testit::assert(is.numeric(replicates))
-  testit::assert(is.character(replacement))
-  testit::assert(replacement == "dispersal" || replacement == "speciation")
-  testit::assert(time > 0)
-  testit::assert(replacement == "dispersal" || M > 1)
   testit::assert(island_pars[4] > 0)
 
   totaltime <- time
@@ -120,8 +99,7 @@ DAISIE_sim_mainland_ex <- function(
     mainland_replicates[[rep]] <- sim_mainland(
       time = time,
       M = M,
-      mu_m = mainland_ext,
-      replacement = replacement)
+      mu_m = mainland_ext)
     for (m_spec in 1:length(mainland_replicates[[rep]])) {
       full_list[[m_spec]] <- DAISIE_sim_core_mainland_ex(
         time = totaltime,
@@ -135,7 +113,6 @@ DAISIE_sim_mainland_ex <- function(
       print(paste("Island replicate ", rep, sep = ""))
     }
   }
-
   island_replicates <- DAISIE_format_mainland_ex(
     island_replicates = island_replicates,
     time = totaltime,
@@ -153,6 +130,5 @@ DAISIE_sim_mainland_ex <- function(
       sample_freq = sample_freq
     )
   }
-
   return(island_replicates)
 }
