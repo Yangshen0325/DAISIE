@@ -1,20 +1,6 @@
 context("sim_mainland")
 
-test_that("sim_mainland produces correct output with replacement by dispersal", {
-  set.seed(1)
-  mainland <- sim_mainland(time = 1,
-                           M = 10,
-                           mu_m = 1,
-                           replacement = "dispersal")
-  expect_true(is.list(mainland))
-  expect_length(mainland, 21)
-  expect_length(mainland[[1]][1, ], 9)
-  expect_equal(
-    mainland[[1]],
-    rbind(c("1", "1", "0", "E", "A", NA, NA, "0", "0.0900888559832138")))
-})
-
-test_that("sim_mainland produces correct output with replacement by speciation", {
+test_that("sim_mainland produces correct output", {
   set.seed(1)
   mainland <- sim_mainland(time = 1,
                            M = 10,
