@@ -18,15 +18,6 @@ DAISIE_sim_core_mainland_ex <- function(
       as.numeric(mainland[, 9]) > timeval), 1])
   mainland_n <- length(mainland_spec)
 
-  # If mainland is empty jump to when species immigrates mainland
-  if (mainland_n == 0) {
-    timeval <- as.numeric(mainland[1, 8])
-    mainland_spec <- as.numeric(mainland[which(
-      as.numeric(mainland[, 8]) <= timeval &
-        as.numeric(mainland[, 9]) > timeval), 1])
-    mainland_n <- length(mainland_spec)
-  }
-
   maxspecID <- max(as.numeric(mainland[, 1]))
   if (nrow(mainland) > 1) {
     mainland_brts <- c(as.numeric(mainland[2:nrow(mainland), 8]), totaltime + 1)
