@@ -463,19 +463,16 @@ create_CS_version <- function(model = 1,
 }
 
 #' Simulates mainland extinction as a pure-death process with replacement
-#' either via dispersal of a new species into the mainland species pool or via
-#' the speciation of an exisiting mainland species.
+#' via the speciation of an exisiting mainland species.
 #'
 #' @param time numeric determing duration of the simulation in million years
 #' @param M  numeric determining size of the mainland species pool
 #' @param mu_m numeric determining mainland extinction rate in extinction
 #' events per lineage per million years.
-#' @param replacement string of either "dispersal" or "speciation".
 #'
 #' @return a list where each element is a mainland lineage, this could be a
-#' single lineage in the case of replacement by dispersal or a single or
-#' multiple lineages in the case of replacement by speciation. Each element of
-#' the list is a matrix with nine columns. The columns contain
+#' single or multiple lineages. Each element of the list is a matrix with nine
+#' columns. The columns contain
 #' \enumerate{
 #'     \item Species identity
 #'     \item Mainland ancestor identity
@@ -491,8 +488,7 @@ create_CS_version <- function(model = 1,
 sim_mainland <- function(
   time,
   M,
-  mu_m,
-  replacement
+  mu_m
 ) {
   totaltime <- time
   time <- 0
@@ -584,65 +580,52 @@ sim_mainland <- function(
         mainland[[lineage]][extinct, 9] <- time
       }
     }
-    if (replacement == "dispersal") {
-      mainland[[length(mainland) + 1]] <-
-        rbind(c(length(mainland) + 1,
-                length(mainland) + 1,
-                time,
-                "I",
-                "A",
-                NA,
-                NA,
-                NA,
-                NA))
+    # REPLACEMENT
+    spec_id_num <- c()
+    spec_id_let <- c()
+    for (i in seq_along(mainland)) {
+      spec_id_num <- as.numeric(c(spec_id_num, mainland[[i]][, 1]))
+      spec_id_let <- c(spec_id_let, mainland[[i]][, 4])
     }
-    if (replacement == "speciation") {
-      spec_id_num <- c()
-      spec_id_let <- c()
-      for (i in seq_along(mainland)) {
-        spec_id_num <- as.numeric(c(spec_id_num, mainland[[i]][, 1]))
-        spec_id_let <- c(spec_id_let, mainland[[i]][, 4])
-      }
-      if (any(spec_id_let == "E")) {
-        spec_id_num <- spec_id_num[-which(spec_id_let == "E")]
-      }
-      branch_spec <- DDD::sample2(spec_id_num, 1)
-      lineage <- c()
-      for (i in seq_along(mainland)) {
-        lineage[i] <- any(as.numeric(mainland[[i]][, 1]) == branch_spec)
-      }
-      lineage <- which(lineage)
-      tosplit <- which(mainland[[lineage]][, 1] == branch_spec)
-      #CLADOGENESIS - this splits species into two new species
-      #for daughter A
-      oldstatus <- mainland[[lineage]][tosplit, 5]
-      mainland[[lineage]][tosplit, 4] <- "E"
-      mainland[[lineage]][tosplit, 9] <- time
-      mainland[[lineage]] <- rbind(
-        mainland[[lineage]],
-        c(maxspecID + 1,
-          mainland[[lineage]][tosplit, 2],
-          mainland[[lineage]][tosplit, 3],
-          "C",
-          paste(oldstatus, "A", sep = ""),
-          time,
-          NA,
-          NA,
-          NA))
-      #for daughter B
-      mainland[[lineage]] <- rbind(
-        mainland[[lineage]],
-        c(maxspecID + 2,
-          mainland[[lineage]][tosplit, 2],
-          mainland[[lineage]][tosplit, 3],
-          "C",
-          paste(oldstatus, "B", sep = ""),
-          time,
-          NA,
-          NA,
-          NA))
-      maxspecID <- maxspecID + 2
+    if (any(spec_id_let == "E")) {
+      spec_id_num <- spec_id_num[-which(spec_id_let == "E")]
     }
+    branch_spec <- DDD::sample2(spec_id_num, 1)
+    lineage <- c()
+    for (i in seq_along(mainland)) {
+      lineage[i] <- any(as.numeric(mainland[[i]][, 1]) == branch_spec)
+    }
+    lineage <- which(lineage)
+    tosplit <- which(mainland[[lineage]][, 1] == branch_spec)
+    #CLADOGENESIS - this splits species into two new species
+    #for daughter A
+    oldstatus <- mainland[[lineage]][tosplit, 5]
+    mainland[[lineage]][tosplit, 4] <- "E"
+    mainland[[lineage]][tosplit, 9] <- time
+    mainland[[lineage]] <- rbind(
+      mainland[[lineage]],
+      c(maxspecID + 1,
+        mainland[[lineage]][tosplit, 2],
+        mainland[[lineage]][tosplit, 3],
+        "C",
+        paste(oldstatus, "A", sep = ""),
+        time,
+        NA,
+        NA,
+        NA))
+    #for daughter B
+    mainland[[lineage]] <- rbind(
+      mainland[[lineage]],
+      c(maxspecID + 2,
+        mainland[[lineage]][tosplit, 2],
+        mainland[[lineage]][tosplit, 3],
+        "C",
+        paste(oldstatus, "B", sep = ""),
+        time,
+        NA,
+        NA,
+        NA))
+    maxspecID <- maxspecID + 2
     time <- time + stats::rexp(n = 1, rate = M * mu_m)
   }
   for (i in seq_along(mainland)) {
@@ -672,9 +655,9 @@ check_island_state <- function(timeval,
                                stt_table) {
   if (any(island_spec[, 4] == "I")) {
     immig_spec <- island_spec[which(island_spec[, 4] == "I"), 1]
-    for (i in immig_spec) {
-      immig_spec_ex_time <- mainland[which(mainland[, 1] == immig_spec), 9]
-      if (timeval > immig_spec_ex_time) {
+    mainland_ex_time <- mainland[which(mainland[, 1] %in% immig_spec), 9]
+    for (ex_time in mainland_ex_time) {
+      if (timeval > ex_time) {
         island_spec[which(island_spec[, 1] == immig_spec), 4] <- "A"
         island_spec[which(island_spec[, 1] == immig_spec), 7] <-
           "mainland_extinction"
