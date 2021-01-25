@@ -3,10 +3,9 @@
 \name{sim_mainland}
 \alias{sim_mainland}
 \title{Simulates mainland extinction as a pure-death process with replacement
-either via dispersal of a new species into the mainland species pool or via
-the speciation of an exisiting mainland species.}
+via the speciation of an exisiting mainland species.}
 \usage{
-sim_mainland(time, M, mu_m, replacement)
+sim_mainland(time, M, mu_m)
 }
 \arguments{
 \item{time}{numeric determing duration of the simulation in million years}
@@ -15,14 +14,11 @@ sim_mainland(time, M, mu_m, replacement)
 
 \item{mu_m}{numeric determining mainland extinction rate in extinction
 events per lineage per million years.}
-
-\item{replacement}{string of either "dispersal" or "speciation".}
 }
 \value{
 a list where each element is a mainland lineage, this could be a
-single lineage in the case of replacement by dispersal or a single or
-multiple lineages in the case of replacement by speciation. Each element of
-the list is a matrix with nine columns. The columns contain
+single or multiple lineages. Each element of the list is a matrix with nine
+columns. The columns contain
 \enumerate{
     \item Species identity
     \item Mainland ancestor identity
@@ -37,7 +33,6 @@ the list is a matrix with nine columns. The columns contain
 }
 \description{
 Simulates mainland extinction as a pure-death process with replacement
-either via dispersal of a new species into the mainland species pool or via
-the speciation of an exisiting mainland species.
+via the speciation of an exisiting mainland species.
 }
 \keyword{internal}

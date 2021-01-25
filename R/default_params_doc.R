@@ -456,8 +456,6 @@
 #'     \item{\code{pars[5]}: lambda^a (anagenesis rate)}
 #'     }
 #' @param mainland_ext Numeric extinction rate on the mainland
-#' @param replacement String defining how replacement occurs on the mainland,
-#' either \code{'dispersal'} or \code{'speciation'}
 #' @param mu_m Numeric extinction rate on the mainland
 #' @keywords internal
 #' @note This is an internal function, so it should be marked with
@@ -589,7 +587,6 @@ default_params_doc <- function(
   sd,
   island_pars,
   mainland_ext,
-  replacement,
   mu_m
 ) {
   # Nothing

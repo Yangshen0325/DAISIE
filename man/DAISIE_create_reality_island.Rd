@@ -4,7 +4,13 @@
 \alias{DAISIE_create_reality_island}
 \title{Converts simulation output into island output}
 \usage{
-DAISIE_create_reality_island(stt_table, totaltime, island_spec, mainland_n)
+DAISIE_create_reality_island(
+  stt_table,
+  totaltime,
+  island_spec,
+  mainland_n,
+  mainland
+)
 }
 \arguments{
 \item{stt_table}{Matrix with number of species at each time step.}

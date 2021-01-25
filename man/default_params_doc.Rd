@@ -128,7 +128,6 @@ default_params_doc(
   sd,
   island_pars,
   mainland_ext,
-  replacement,
   mu_m
 )
 }
@@ -711,9 +710,6 @@ relaxed-rate model}
   }}
 
 \item{mainland_ext}{Numeric extinction rate on the mainland}
-
-\item{replacement}{String defining how replacement occurs on the mainland,
-either \code{'dispersal'} or \code{'speciation'}}
 
 \item{mu_m}{Numeric extinction rate on the mainland}
 }

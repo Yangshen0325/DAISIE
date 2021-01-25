@@ -11,7 +11,6 @@ DAISIE_sim_mainland_ex(
   island_pars,
   mainland_ext,
   replicates,
-  replacement,
   sample_freq = 25,
   plot_sims = TRUE,
   verbose = TRUE,
@@ -41,9 +40,6 @@ species that can potentially colonize the island.}
 
 \item{replicates}{Integer specifying number of island replicates to be
 simulated.}
-
-\item{replacement}{String defining how replacement occurs on the mainland,
-either \code{'dispersal'} or \code{'speciation'}}
 
 \item{sample_freq}{Numeric specifing the number of units times should be
 divided by for plotting purposes. Larger values will lead to plots with
@@ -108,8 +104,7 @@ time-constant parameters.
 }
 \examples{
 ## Simulate 2 islands (replicates) for 1 million years, with a mainland
-## extinction rate of 1 (SpMy^-1) and replacement in the mainland species
-## pool with dispersal. Pool size 100.
+## extinction rate of 1 (SpMy^-1). Pool size 100.
 
 set.seed(1)
 island_replicates <- DAISIE_sim_mainland_ex(
@@ -118,23 +113,6 @@ island_replicates <- DAISIE_sim_mainland_ex(
   island_pars = c(1, 1, 10, 0.1, 1),
   mainland_ext = 1,
   replicates = 2,
-  replacement = "dispersal",
-  plot_sims = FALSE,
-  verbose = FALSE
-)
-
-## Simulate 2 islands (replicates) for 1 million years, with a mainland
-## extinction rate of 1 (SpMy^-1) and replacement in the mainland species
-## pool with speciation. Pool size 100.
-
-set.seed(1)
-island_replicates <- DAISIE_sim_mainland_ex(
-  time = 1,
-  M = 100,
-  island_pars = c(1, 1, 10, 0.1, 1),
-  mainland_ext = 1,
-  replicates = 2,
-  replacement = "speciation",
   plot_sims = FALSE,
   verbose = FALSE
 )
