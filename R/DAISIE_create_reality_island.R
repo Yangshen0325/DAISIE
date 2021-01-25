@@ -9,7 +9,8 @@
 DAISIE_create_reality_island <- function(stt_table,
                                          totaltime,
                                          island_spec,
-                                         mainland_n) {
+                                         mainland_n,
+                                         mainland) {
 
   ### if there are no species on the island branching_times = island_age,
   ### stac = 0, missing_species = 0
@@ -27,6 +28,52 @@ DAISIE_create_reality_island <- function(stt_table,
                 "branching time (BP)",
                 "Anagenetic_origin")
     colnames(island_spec) <- cnames
+
+    ### number of independent colonisations
+    uniquecolonisation <- as.numeric(unique(
+      island_spec[, "Colonisation time (BP)"]))
+    number_colonisations <- length(uniquecolonisation)
+
+    ### if there is only one independent colonisation - anagenetic and
+    ### cladogenetic species are classed as stac=2; immigrant classed as stac=4:
+    if (number_colonisations == 1) {
+          if (island_spec[1, "Species type"] == "I") {
+            descendants <- list(stt_table = stt_table,
+                                branching_times = c(
+                                  time,
+                                  as.numeric(island_spec[1, "Colonisation time (BP)"])
+                                ),
+                                stac = 4,
+                                missing_species = 0)
+          }
+          if (island_spec[1, "Species type"] == "A") {
+            descendants <- list(stt_table = stt_table,
+                                branching_times = c(
+                                  time,
+                                  as.numeric(island_spec[1, "Colonisation time (BP)"])
+                                ),
+                                stac = 2,
+                                missing_species = 0)
+          }
+          if (island_spec[1, "Species type"] == "C") {
+            descendants <- list(stt_table = stt_table,
+                                branching_times = c(
+                                  time,
+                                  sort(
+                                    as.numeric(island_spec[, "branching time (BP)"]),
+                                    decreasing = TRUE
+                                  )
+                                ),
+                                stac = 2,
+                                missing_species = 0)
+          }
+    }
+
+
+
+
+
+
     ### set ages as counting backwards from present
     island_spec[, "branching time (BP)"] <- totaltime -
       as.numeric(island_spec[, "branching time (BP)"])
@@ -43,7 +90,7 @@ DAISIE_create_reality_island <- function(stt_table,
         if (island_spec[1, "Species type"] == "I") {
           descendants <- list(stt_table = stt_table,
                               branching_times = c(
-                                time,
+                                totaltime,
                                 as.numeric(island_spec[1, "Colonisation time (BP)"])
                               ),
                               stac = 4,
@@ -52,7 +99,7 @@ DAISIE_create_reality_island <- function(stt_table,
         if (island_spec[1, "Species type"] == "A") {
           descendants <- list(stt_table = stt_table,
                               branching_times = c(
-                                time,
+                                totaltime,
                                 as.numeric(island_spec[1, "Colonisation time (BP)"])
                               ),
                               stac = 2,
@@ -61,7 +108,7 @@ DAISIE_create_reality_island <- function(stt_table,
         if (island_spec[1, "Species type"] == "C") {
           descendants <- list(stt_table = stt_table,
                               branching_times = c(
-                                time,
+                                totaltime,
                                 sort(
                                   as.numeric(island_spec[, "branching time (BP)"]),
                                   decreasing = TRUE
@@ -109,7 +156,7 @@ DAISIE_create_reality_island <- function(stt_table,
           testit::assert(youngest_col_time %in% btimes_all_clado_desc)
           btimes_all_clado_desc <- btimes_all_clado_desc[-i_youngest_col_btimes]
 
-          descendants$branching_times <- c(time, btimes_all_clado_desc)
+          descendants$branching_times <- c(totaltime, btimes_all_clado_desc)
           testit::assert(!(youngest_col_time %in% btimes_all_clado_desc))
 
           # If no cladogenetic species is present, remove the youngest col time
@@ -118,7 +165,7 @@ DAISIE_create_reality_island <- function(stt_table,
           i_youngest_col_time <- which(col_times == youngest_col_time)
           col_times <- col_times[-i_youngest_col_time]
 
-          descendants$branching_times <- c(time, col_times)
+          descendants$branching_times <- c(totaltime, col_times)
         }
 
 
@@ -138,21 +185,21 @@ DAISIE_create_reality_island <- function(stt_table,
 
           if (island_spec[samecolonisation[1], "Species type"] == "I") {
             descendants$all_colonisations[[i]]$event_times <- as.numeric(
-              c(time,island_spec[samecolonisation, "Colonisation time (BP)"])
+              c(totaltime,island_spec[samecolonisation, "Colonisation time (BP)"])
             )
             descendants$all_colonisations[[i]]$species_type <- "I"
           }
 
           if (island_spec[samecolonisation[1], "Species type"] == "A") {
             descendants$all_colonisations[[i]]$event_times <- as.numeric(
-              c(time, island_spec[samecolonisation, "Colonisation time (BP)"])
+              c(totaltime, island_spec[samecolonisation, "Colonisation time (BP)"])
             )
             descendants$all_colonisations[[i]]$species_type <- "A"
           }
 
           if (island_spec[samecolonisation[1], "Species type"] == "C") {
             descendants$all_colonisations[[i]]$event_times <-
-              sort(c(time, as.numeric(
+              sort(c(totaltime, as.numeric(
                 island_spec[samecolonisation, "branching time (BP)"]
               )), decreasing = TRUE)
             descendants$all_colonisations[[i]]$species_type <- "C"
