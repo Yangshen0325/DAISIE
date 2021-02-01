@@ -62,7 +62,7 @@ means also intermediate progress during loglikelihood computation is shown.}
 }
 \value{
 A list. The highest level of the least corresponds to each individual
-replciate. The first element of each replicate is composed of island
+replicate. The first element of each replicate is composed of island
 information containing:
 \itemize{
   \item{\code{$island_age}: A numeric with the island age.}

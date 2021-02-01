@@ -11,7 +11,7 @@
 #'
 #' @return
 #' A list. The highest level of the least corresponds to each individual
-#' replciate. The first element of each replicate is composed of island
+#' replicate. The first element of each replicate is composed of island
 #' information containing:
 #' \itemize{
 #'   \item{\code{$island_age}: A numeric with the island age.}
@@ -64,7 +64,6 @@
 #'   plot_sims = FALSE,
 #'   verbose = FALSE
 #' )
-
 #'
 #' @export DAISIE_sim_mainland_ex
 DAISIE_sim_mainland_ex <- function(
