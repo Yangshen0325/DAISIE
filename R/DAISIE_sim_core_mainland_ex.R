@@ -76,6 +76,7 @@ DAISIE_sim_core_mainland_ex <- function(
 
       # Changes island species to endemic when a mainland species goes extinct
       island_state <- check_island_state(timeval = timeval,
+                                         totaltime = totaltime,
                                          island_spec = island_spec,
                                          mainland = mainland,
                                          stt_table = stt_table)
