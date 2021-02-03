@@ -30,7 +30,11 @@ DAISIE_sim_mainland <- function(
   for (i in 1:M) {
     mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA))
   }
-  time <- stats::rexp(n = 1, rate = M * mainland_ext)
+  if (mainland_ext == 0) {
+    time <- totaltime
+  } else {
+    time <- stats::rexp(n = 1, rate = M * mainland_ext)
+  }
   while (time < totaltime) {
     #EXTINCTION
     spec_id_num <- c()
