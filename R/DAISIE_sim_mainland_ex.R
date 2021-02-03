@@ -95,7 +95,7 @@ DAISIE_sim_mainland_ex <- function(
     island_replicates[[rep]] <- list()
     mainland_replicates[[rep]] <- list()
     full_list <- list()
-    mainland_replicates[[rep]] <- sim_mainland(
+    mainland_replicates[[rep]] <- DAISIE_sim_mainland(
       time = time,
       M = M,
       mainland_ext = mainland_ext)
