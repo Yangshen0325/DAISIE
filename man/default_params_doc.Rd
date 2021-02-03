@@ -127,8 +127,7 @@ default_params_doc(
   mean,
   sd,
   island_pars,
-  mainland_ext,
-  mu_m
+  mainland_ext
 )
 }
 \arguments{
@@ -710,8 +709,6 @@ relaxed-rate model}
   }}
 
 \item{mainland_ext}{Numeric extinction rate on the mainland}
-
-\item{mu_m}{Numeric extinction rate on the mainland}
 }
 \value{
 Nothing

@@ -4,10 +4,12 @@
 \alias{check_island_state}
 \title{Checks if any changes on the mainland change the state of the island species}
 \usage{
-check_island_state(timeval, island_spec, mainland, stt_table)
+check_island_state(timeval, totaltime, island_spec, mainland, stt_table)
 }
 \arguments{
 \item{timeval}{Numeric defining current time of simulation.}
+
+\item{totaltime}{Numeric defining the length of the simulation in time units.}
 
 \item{island_spec}{Matrix with current state of simulation containing number
 of species.}

@@ -456,7 +456,6 @@
 #'     \item{\code{pars[5]}: lambda^a (anagenesis rate)}
 #'     }
 #' @param mainland_ext Numeric extinction rate on the mainland
-#' @param mu_m Numeric extinction rate on the mainland
 #' @keywords internal
 #' @note This is an internal function, so it should be marked with
 #'   \code{@noRd}. This is not done, as this will disallow all
@@ -586,8 +585,7 @@ default_params_doc <- function(
   mean,
   sd,
   island_pars,
-  mainland_ext,
-  mu_m
+  mainland_ext
 ) {
   # Nothing
 }
