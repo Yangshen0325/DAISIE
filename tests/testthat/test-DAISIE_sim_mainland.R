@@ -1,11 +1,10 @@
-context("sim_mainland")
+context("DAISIE_sim_mainland")
 
-test_that("sim_mainland produces correct output", {
+test_that("DAISIE_sim_mainland produces correct output", {
   set.seed(1)
-  mainland <- sim_mainland(time = 1,
+  mainland <- DAISIE_sim_mainland(time = 1,
                            M = 10,
-                           mu_m = 1,
-                           replacement = "speciation")
+                           mainland_ext = 1)
   expect_true(is.list(mainland))
   expect_length(mainland, 10)
   expect_length(mainland[[1]][1, ], 9)
