@@ -98,7 +98,7 @@ DAISIE_sim_mainland_ex <- function(
     mainland_replicates[[rep]] <- sim_mainland(
       time = time,
       M = M,
-      mu_m = mainland_ext)
+      mainland_ext = mainland_ext)
     for (m_spec in 1:length(mainland_replicates[[rep]])) {
       full_list[[m_spec]] <- DAISIE_sim_core_mainland_ex(
         time = totaltime,
