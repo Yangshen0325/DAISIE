@@ -36,237 +36,158 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
     island_spec[, "Colonisation time (BP)"] <- totaltime -
       as.numeric(island_spec[, "Colonisation time (BP)"])
 
-    ideal_island <- DAISIE_ONEcolonist(time = totaltime,
-                                       island_spec = island_spec,
-                                       stt_table = stt_table)
-
     ### number of independent colonisations from different mainland species
-    diff_colonisations <- unique(island_spec[, "Mainland Ancestor"])
-    ### is the mainland ancestor extinct on the mainland
-    extinct_mainland_ancestor <-
-      mainland[which(mainland[, 1] == diff_colonisations), 9] < totaltime
-    ### number of independent colonisations from the same mainland species
-    num_colonisation <- length(as.numeric(unique(
-      island_spec[, "Colonisation time (BP)"])))
-    ### is there any extant mainland descendants of the immigrant
-    extant_mainland_descendants <-
-      any(mainland[which(mainland[, 2] == diff_colonisations), 9] == totaltime)
+    colonists_present <- sort(as.numeric(unique(
+      island_spec[, "Mainland Ancestor"])))
+    number_colonists_present <- length(colonists_present)
+    ideal_island_clades_info <- list()
+    reality_island_clades_info <- list()
+    for (i in 1:number_colonists_present) {
+      subset_island <- island_spec[which(island_spec[, "Mainland Ancestor"] ==
+                                           colonists_present[i]), ]
+      if (!is.matrix(subset_island)) {
+        subset_island <- rbind(subset_island[1:7])
+        colnames(subset_island) <- cnames
+      }
+      ideal_island_clades_info[[i]] <- DAISIE_ONEcolonist(
+        time = totaltime,
+        island_spec = subset_island,
+        stt_table = NULL)
+      ideal_island_clades_info[[i]]$stt_table <- NULL
 
-    for (i in diff_colonisations) {
-      if (extinct_mainland_ancestor == TRUE) {
-        if (num_colonisation == 1) {
-          if (extant_mainland_descendants == TRUE) {
-            reality_island <- list(
-              stt_table = stt_table,
-              branching_times = c(
-                totaltime,
-                as.numeric(island_spec[1, "Colonisation time (BP)"])
-              ),
-              stac = 2,
-              missing_species = 0)
-          } else {
-            #are there any branching times between immig and island age
-            browser()
-          }
-        } else {
-          if (extant_mainland_descendants == TRUE) {
-            reality_island <- list(stt_table = stt_table,
-                                   branching_times = NA,
-                                   stac = 3,
-                                   missing_species = 0,
-                                   all_colonisations = list())
+      mainland_spec <- which(mainland[, 1] == colonists_present[i])
+      ### is the mainland ancestor extant on the mainland
+      extant_mainland_ancestor <-
+        mainland[mainland_spec, 4] != "E"
+      ### number of independent colonisations from the same mainland species
+      uniquecolonisation <- as.numeric(unique(
+        subset_island[, "Colonisation time (BP)"]))
+      number_colonisations <- length(uniquecolonisation)
+      ### is there any extant mainland descendants of the immigrant
+      branching_code <- paste("^", mainland[mainland_spec, 5], sep = "")
+      descending_branches <- grep(branching_code, mainland[, 5])
+      extant_descending_branches <-
+        any(mainland[descending_branches, 9] == totaltime)
+      number_mainland_branches <- nchar(mainland[mainland_spec, 5]) - 1
 
-            # Get branching and colonisation times
-            btimes_all_clado_desc <- rev(
-              sort(as.numeric(island_spec[, "branching time (BP)"]))
-            )
-            col_times <- sort(
-              unique(as.numeric(island_spec[, "Colonisation time (BP)"])),
-              decreasing = TRUE
-            )
-
-            # If there are endemic descendants find youngest col time
-            if (length(btimes_all_clado_desc) != 0) {
-              # Ensure all col_times are in b_times at this point.
-              # Covers cases of one recolonization followed by cladogenesis and
-              # potential extinction
-              if (any(!(col_times %in% btimes_all_clado_desc))) {
-                miss_col_time <- which(!(col_times %in% btimes_all_clado_desc))
-                btimes_all_clado_desc <- sort(
-                  c(btimes_all_clado_desc, col_times[miss_col_time]),
-                  decreasing = TRUE
-                )
-              }
-              youngest_col_time <- min(col_times)
-              i_youngest_col_btimes <- which(btimes_all_clado_desc == youngest_col_time)
-
-              # Remove youngest col time in branching times
-              testit::assert(youngest_col_time %in% btimes_all_clado_desc)
-              btimes_all_clado_desc <- btimes_all_clado_desc[-i_youngest_col_btimes]
-
-              island$branching_times <- c(totaltime, btimes_all_clado_desc)
-              testit::assert(!(youngest_col_time %in% btimes_all_clado_desc))
-
-              # If no cladogenetic species is present, remove the youngest col time
-            } else if (length(btimes_all_clado_desc) == 0) {
-              youngest_col_time <- min(col_times)
-              i_youngest_col_time <- which(col_times == youngest_col_time)
-              col_times <- col_times[-i_youngest_col_time]
-
-              island$branching_times <- c(totaltime, col_times)
-            }
-
-            # all_colonisations section
-            uniquecol <- sort(as.numeric(
-              unique(island_spec[, "Colonisation time (BP)"])), decreasing = TRUE
-            )
-            for (i in seq_along(uniquecol)) {
-              reality_island$all_colonisations[[i]] <- list(
-                event_times = NA,
-                species_type = NA
-              )
-
-              samecolonisation <- which(as.numeric(
-                island_spec[, "Colonisation time (BP)"]) == uniquecol[i]
-              )
-
-              if (island_spec[samecolonisation[1], "Species type"] == "I") {
-                reality_island$all_colonisations[[i]]$event_times <- as.numeric(
-                  c(totaltime,island_spec[samecolonisation, "Colonisation time (BP)"])
-                )
-                reality_island$all_colonisations[[i]]$species_type <- "I"
-              }
-
-              if (island_spec[samecolonisation[1], "Species type"] == "A") {
-                reality_island$all_colonisations[[i]]$event_times <- as.numeric(
-                  c(totaltime, island_spec[samecolonisation, "Colonisation time (BP)"])
-                )
-                reality_island$all_colonisations[[i]]$species_type <- "A"
-              }
-
-              if (island_spec[samecolonisation[1], "Species type"] == "C") {
-                reality_island$all_colonisations[[i]]$event_times <-
-                  sort(c(totaltime, as.numeric(
-                    island_spec[samecolonisation, "branching time (BP)"]
-                  )), decreasing = TRUE)
-                reality_island$all_colonisations[[i]]$species_type <- "C"
-              }
-            }
-          } else {
-            #are there any branching times between immig and island age
-            browser()
-          }
-        }
+      if (extant_mainland_ancestor) {
+        reality_island_clades_info[[i]] <- ideal_island_clades_info[[i]]
       } else {
-        if (num_colonisation == 1) {
-          if (island_spec[, 4] == "I") {
-            ### non-endemic species
-            reality_island <- list(
-              stt_table = stt_table,
-              branching_times = c(
-                totaltime,
-                as.numeric(island_spec[1, "Colonisation time (BP)"])
-              ),
-              stac = 4,
-              missing_species = 0)
+        if (number_colonisations == 1) {
+          if (extant_descending_branches) {
+            reality_island_clades_info[[i]] <- ideal_island_clades_info[[i]]
           } else {
-            ### endemic species
-            reality_island <- list(
-              stt_table = stt_table,
-              branching_times = c(
-                totaltime,
-                as.numeric(island_spec[1, "Colonisation time (BP)"])
-              ),
-              stac = 2,
-              missing_species = 0)
+            #are there any branching times between immig and island age
+            if (number_mainland_branches == 0) {
+              if (sum(island_spec[, 2] == i) == 1) {
+                #singleton
+                reality_island_clades_info[[i]] <- list(
+                  branching_times = c(
+                    totaltime,
+                    totaltime - 1e-5),
+                  stac = 5,
+                  missing_species = 0)
+              } else {
+                #clade
+                reality_island_clades_info[[i]] <- list(
+                  branching_times = c(
+                    totaltime,
+                    totaltime - 1e-5,
+                    sort(
+                      as.numeric(island_spec[, "branching time (BP)"]),
+                      decreasing = TRUE)
+                    ),
+                  stac = 6,
+                  missing_species = 0)
+              }
+            } else {
+              #are any of the descendants extant
+              if (any(mainland[, 4] != "E")) {
+                #which branching time
+                #get all the extant descendants
+                extant_sisters <- which(mainland[, 4] != "E")
+                branching_times <- c()
+                for (j in seq_along(extant_sisters)) {
+                  #get the branching time of the focal species and them
+                  numberofsplits <- nchar(mainland[mainland[, 1] == colonists_present[i], 5]) - 1
+                  mostrecentspl <- substring(mainland[mainland[, 1] == colonists_present[i], 5], numberofsplits)
+                  branching_times[j] <- mainland[mainland[, 5] == mostrecentspl, 9]
+                }
+                branching_time <- min(branching_times)
+                reality_island_clades_info[[i]] <- list(
+                  branching_times = c(
+                    totaltime,
+                    branching_time),
+                  stac = 2,
+                  missing_species = 0)
+              } else {
+                if (sum(island_spec[, 2] == i) == 1) {
+                  #singleton
+                  reality_island_clades_info[[i]] <- list(
+                    branching_times = c(
+                      totaltime,
+                      totaltime - 1e-5),
+                    stac = 5,
+                    missing_species = 0)
+                } else {
+                  #clade
+                  reality_island_clades_info[[i]] <- list(
+                    branching_times = c(
+                      totaltime,
+                      totaltime - 1e-5,
+                      sort(
+                        as.numeric(island_spec[, "branching time (BP)"]),
+                        decreasing = TRUE)
+                      ),
+                    stac = 6,
+                    missing_species = 0)
+                }
+              }
+            }
           }
         } else {
-          reality_island <- list(stt_table = stt_table,
-                                 branching_times = NA,
-                                 stac = 3,
-                                 missing_species = 0,
-                                 all_colonisations = list())
-
-          # Get branching and colonisation times
-          btimes_all_clado_desc <- rev(
-            sort(as.numeric(island_spec[, "branching time (BP)"]))
-          )
-          col_times <- sort(
-            unique(as.numeric(island_spec[, "Colonisation time (BP)"])),
-            decreasing = TRUE
-          )
-
-          # If there are endemic descendants find youngest col time
-          if (length(btimes_all_clado_desc) != 0) {
-            # Ensure all col_times are in b_times at this point.
-            # Covers cases of one recolonization followed by cladogenesis and
-            # potential extinction
-            if (any(!(col_times %in% btimes_all_clado_desc))) {
-              miss_col_time <- which(!(col_times %in% btimes_all_clado_desc))
-              btimes_all_clado_desc <- sort(
-                c(btimes_all_clado_desc, col_times[miss_col_time]),
-                decreasing = TRUE
-              )
-            }
-            youngest_col_time <- min(col_times)
-            i_youngest_col_btimes <- which(btimes_all_clado_desc == youngest_col_time)
-
-            # Remove youngest col time in branching times
-            testit::assert(youngest_col_time %in% btimes_all_clado_desc)
-            btimes_all_clado_desc <- btimes_all_clado_desc[-i_youngest_col_btimes]
-
-            reality_island$branching_times <- c(totaltime, btimes_all_clado_desc)
-            testit::assert(!(youngest_col_time %in% btimes_all_clado_desc))
-
-            # If no cladogenetic species is present, remove the youngest col time
-          } else if (length(btimes_all_clado_desc) == 0) {
-            youngest_col_time <- min(col_times)
-            i_youngest_col_time <- which(col_times == youngest_col_time)
-            col_times <- col_times[-i_youngest_col_time]
-
-            reality_island$branching_times <- c(totaltime, col_times)
-          }
-
-          # all_colonisations section
-          uniquecol <- sort(as.numeric(
-            unique(island_spec[, "Colonisation time (BP)"])), decreasing = TRUE
-          )
-          for (i in seq_along(uniquecol)) {
-            reality_island$all_colonisations[[i]] <- list(
-              event_times = NA,
-              species_type = NA
-            )
-
-            samecolonisation <- which(as.numeric(
-              island_spec[, "Colonisation time (BP)"]) == uniquecol[i]
-            )
-
-            if (island_spec[samecolonisation[1], "Species type"] == "I") {
-              reality_island$all_colonisations[[i]]$event_times <- as.numeric(
-                c(totaltime,island_spec[samecolonisation, "Colonisation time (BP)"])
-              )
-              reality_island$all_colonisations[[i]]$species_type <- "I"
-            }
-
-            if (island_spec[samecolonisation[1], "Species type"] == "A") {
-              reality_island$all_colonisations[[i]]$event_times <- as.numeric(
-                c(totaltime, island_spec[samecolonisation, "Colonisation time (BP)"])
-              )
-              reality_island$all_colonisations[[i]]$species_type <- "A"
-            }
-
-            if (island_spec[samecolonisation[1], "Species type"] == "C") {
-              reality_island$all_colonisations[[i]]$event_times <-
-                sort(c(totaltime, as.numeric(
-                  island_spec[samecolonisation, "branching time (BP)"]
-                )), decreasing = TRUE)
-              reality_island$all_colonisations[[i]]$species_type <- "C"
+          if (extant_descending_branches == TRUE) {
+            reality_island_clades_info[[i]] <- ideal_island_clades_info[[i]]
+          } else {
+            #are there any branching times between immig and island age
+            if (number_mainland_branches == 0) {
+              reality_island_clades_info[[i]] <- list(
+                branching_times = c(
+                  totaltime,
+                  totaltime - 1e-5,
+                  sort(
+                    as.numeric(island_spec[, "branching time (BP)"]),
+                    decreasing = TRUE)
+                  ),
+                stac = 6,
+                missing_species = 0)
+            } else {
+              #are any of the descendants extant
+              if (any(mainland[, 4] != "E")) {
+                reality_island_clades_info[[i]] <- ideal_island_clades_info[[i]]
+              } else {
+                reality_island_clades_info[[i]] <- list(
+                  branching_times = c(
+                    totaltime,
+                    totaltime - 1e-5,
+                    sort(
+                      as.numeric(island_spec[, "branching time (BP)"]),
+                      decreasing = TRUE)
+                    ),
+                  stac = 6,
+                  missing_species = 0)
+              }
             }
           }
         }
       }
     }
+    ideal_island <- list(stt_table = stt_table,
+                         taxon_list = ideal_island_clades_info)
+    reality_island <- list(stt_table = stt_table,
+                           taxon_list = reality_island_clades_info)
   }
+  browser()
   return(list(ideal_island = ideal_island,
               reality_island = reality_island))
 }
