@@ -163,7 +163,6 @@ DAISIE_sim_mainland <- function(
         NA,
         NA))
     maxspecID <- maxspecID + 2
-    print(time) #delete
     time <- time + stats::rexp(n = 1, rate = M * mainland_ext)
   }
   for (i in seq_along(mainland)) {
