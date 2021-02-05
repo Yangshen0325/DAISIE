@@ -20,11 +20,10 @@ DAISIE_format_mainland_ex <- function(island_replicates,
     reality_island_replicates[[1]][[i]] <- island_replicates[[1]][[i]]$reality_island
   }
 
-  ideal_islands <- DAISIE_format_CS(
+  ideal_islands <- DAISIE_format_mainland_ex_core(
     island_replicates = ideal_island_replicates,
     time = time,
     M = M,
-    sample_freq = sample_freq,
     verbose = verbose)
 
   reality_islands <- DAISIE_format_CS(
