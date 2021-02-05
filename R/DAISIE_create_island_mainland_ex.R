@@ -187,7 +187,6 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
     reality_island <- list(stt_table = stt_table,
                            taxon_list = reality_island_clades_info)
   }
-  browser()
   return(list(ideal_island = ideal_island,
               reality_island = reality_island))
 }
