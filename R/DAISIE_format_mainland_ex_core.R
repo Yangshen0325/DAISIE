@@ -13,20 +13,28 @@ DAISIE_format_mainland_ex_core <- function(island_replicates,
   totaltime <- time
   several_islands <- list()
 
+
+
   for (rep in seq_along(island_replicates)) {
     full_list <- island_replicates[[rep]]
 
 ### separate taxon_list lists from empty island lists
-    lapply(full_list, function(x) {
-      empty_islands <- list()
-      nonempty_islands <- list()
-      if (length(x) == 2) {
-        nonempty_islands <- append(nonempty_islands, x$taxon_list)
-      } else {
-        empty_islands <- append(empty_islands, x)
-      }
-    })
 
+    print(length(full_list))
+
+    new_full_list <- list()
+    for (i in seq_along(full_list)) {
+      if (is.null(full_list[[i]]$taxon_list)) {
+        new_full_list[[i]] <- full_list[[i]]
+      } else {
+        for (j in seq_along(full_list[[i]]$taxon_list)) {
+          new_full_list <- append(new_full_list, full_list[[i]]$taxon_list[[j]])
+        }
+      }
+    }
+
+    print(length(new_full_list))
+    browser()
 
     stac_zero_vec <- unlist(full_list)[which(names(unlist(full_list)) == "stac")]
     number_not_present <- length(stac_zero_vec)
