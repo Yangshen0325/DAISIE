@@ -26,9 +26,9 @@ DAISIE_sim_mainland <- function(
   totaltime <- time
   time <- 0
   maxspecID <- M
-  mainland <- list()
+  mainland <- list() # mainland <- vector(mode = "list", length = M)
   for (i in 1:M) {
-    mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA))
+    mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA)) #use matrix?
   }
   if (mainland_ext == 0) {
     time <- totaltime
@@ -164,6 +164,7 @@ DAISIE_sim_mainland <- function(
         NA))
     maxspecID <- maxspecID + 2
     time <- time + stats::rexp(n = 1, rate = M * mainland_ext)
+    print(time) #delete
   }
   for (i in seq_along(mainland)) {
     for (j in seq_len(nrow(mainland[[i]]))) {
