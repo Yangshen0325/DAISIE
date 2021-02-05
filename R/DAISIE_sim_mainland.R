@@ -26,9 +26,9 @@ DAISIE_sim_mainland <- function(
   totaltime <- time
   time <- 0
   maxspecID <- M
-  mainland <- list() # mainland <- vector(mode = "list", length = M)
+  mainland <- vector(mode = "list", length = M)
   for (i in 1:M) {
-    mainland[[i]] <- rbind(c(i, i, 0, "I", "A", NA, NA, 0, NA)) #use matrix?
+    mainland[[i]] <- matrix(c(i, i, 0, "I", "A", NA, NA, 0, NA), nrow = 1)
   }
   if (mainland_ext == 0) {
     time <- totaltime
@@ -54,11 +54,7 @@ DAISIE_sim_mainland <- function(
     lineage <- which(lineage)
     extinct <- which(mainland[[lineage]][, 1] == extinct_spec)
     typeofspecies <- mainland[[lineage]][extinct, 4]
-    if (typeofspecies == "I") {
-      mainland[[lineage]][extinct, 4] <- "E"
-      mainland[[lineage]][extinct, 9] <- time
-    }
-    if (typeofspecies == "A") {
+    if (typeofspecies == "I" || typeofspecies == "A") {
       mainland[[lineage]][extinct, 4] <- "E"
       mainland[[lineage]][extinct, 9] <- time
     }
@@ -164,7 +160,6 @@ DAISIE_sim_mainland <- function(
         NA))
     maxspecID <- maxspecID + 2
     time <- time + stats::rexp(n = 1, rate = M * mainland_ext)
-    print(time) #delete
   }
   for (i in seq_along(mainland)) {
     for (j in seq_len(nrow(mainland[[i]]))) {
