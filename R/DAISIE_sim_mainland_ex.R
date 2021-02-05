@@ -46,8 +46,6 @@
 #' }
 #' @author Luis Valente, Albert Phillimore, Joshua Lambert, Shu Xie, Pedro
 #' Neves, Richèl J. C. Bilderbeek, Rampal Etienne
-#' @seealso \code{\link{DAISIE_plot_sims}()} for plotting STT of simulation
-#' outputs.
 #' @family simulation models
 #' @keywords models
 #' @examples
@@ -61,7 +59,6 @@
 #'   island_pars = c(1, 1, 10, 0.1, 1),
 #'   mainland_ext = 1,
 #'   replicates = 2,
-#'   plot_sims = FALSE,
 #'   verbose = FALSE
 #' )
 #'
@@ -72,8 +69,6 @@ DAISIE_sim_mainland_ex <- function(
   island_pars,
   mainland_ext,
   replicates,
-  sample_freq = 25,
-  plot_sims = TRUE,
   verbose = TRUE,
   ...
 ) {
@@ -119,15 +114,5 @@ DAISIE_sim_mainland_ex <- function(
     sample_freq = sample_freq,
     verbose = verbose
   )
-  if (plot_sims == TRUE) {
-    DAISIE_plot_sims(
-      island_replicates = island_replicates$ideal_islands,
-      sample_freq = sample_freq
-    )
-    DAISIE_plot_sims(
-      island_replicates = island_replicates$reality_islands,
-      sample_freq = sample_freq
-    )
-  }
   return(island_replicates)
 }
