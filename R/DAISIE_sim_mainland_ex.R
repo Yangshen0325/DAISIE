@@ -111,7 +111,6 @@ DAISIE_sim_mainland_ex <- function(
     island_replicates = island_replicates,
     time = totaltime,
     M = M,
-    sample_freq = sample_freq,
     verbose = verbose
   )
   return(island_replicates)

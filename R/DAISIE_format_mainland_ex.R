@@ -8,7 +8,6 @@
 DAISIE_format_mainland_ex <- function(island_replicates,
                                       time,
                                       M,
-                                      sample_freq,
                                       verbose = TRUE) {
 
   ideal_island_replicates <- list()
