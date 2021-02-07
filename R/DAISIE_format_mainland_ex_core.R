@@ -12,55 +12,37 @@ DAISIE_format_mainland_ex_core <- function(island_replicates,
 
   totaltime <- time
   several_islands <- list()
-
-
-
   for (rep in seq_along(island_replicates)) {
     full_list <- island_replicates[[rep]]
-
-### separate taxon_list lists from empty island lists
-
-    print(length(full_list))
-
+    ### separate taxon_list lists from empty island lists
     new_full_list <- list()
     for (i in seq_along(full_list)) {
       if (is.null(full_list[[i]]$taxon_list)) {
-        new_full_list[[i]] <- full_list[[i]]
+        temp_list <- full_list[i]
+        temp_list[[1]]$stt_table <- NULL
+        new_full_list <- append(new_full_list, temp_list)
       } else {
+        temp_list <- list()
         for (j in seq_along(full_list[[i]]$taxon_list)) {
-          new_full_list <- append(new_full_list, full_list[[i]]$taxon_list[[j]])
+          temp_list[[j]] <- full_list[[i]]$taxon_list[[j]]
         }
+        new_full_list <- append(new_full_list, temp_list)
       }
     }
-
-    print(length(new_full_list))
-    browser()
-
-    stac_zero_vec <- unlist(full_list)[which(names(unlist(full_list)) == "stac")]
-    number_not_present <- length(stac_zero_vec)
-    stac_nonzero_vec <- unlist(full_list)[which(names(unlist(full_list)) == "taxon_list.stac")]
+    stac_vec <- unlist(new_full_list)[which(names(unlist(new_full_list)) == "stac")]
+    number_not_present <- length(which(stac_vec == 0))
     present <- which(stac_vec != 0)
     number_present <- length(present)
-    island_list <- list()
-    for (i in 1:(number_present + 1)) {
-      island_list[[i]] <- list()
-    }
 
+    island_list <- list()
     island_list[[1]] <- list(island_age = totaltime,
                              not_present = number_not_present)
-
     if (number_present > 0) {
       for (i in 1:number_present) {
-        island_list[[1 + i]] <- full_list[[present[i]]]
-        island_list[[1 + i]]$stt_table <- NULL
+        island_list[[1 + i]] <- new_full_list[[present[i]]]
       }
     }
-    if (number_present == 0) {
-      island_list <- list()
-      island_list[[1]] <- list(island_age = totaltime,
-                               not_present = M,
-                               stt_all = stt_all)
-    }
+
     several_islands[[rep]] <- island_list
     if (verbose == TRUE) {
       print(paste("Island being formatted: ",
