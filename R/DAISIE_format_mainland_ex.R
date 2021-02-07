@@ -13,11 +13,13 @@ DAISIE_format_mainland_ex <- function(island_replicates,
 
   ideal_island_replicates <- list()
   reality_island_replicates <- list()
-  ideal_island_replicates[[1]] <- list()
-  reality_island_replicates[[1]] <- list()
-  for (i in seq_along(island_replicates[[1]])) {
-    ideal_island_replicates[[1]][[i]] <- island_replicates[[1]][[i]]$ideal_island
-    reality_island_replicates[[1]][[i]] <- island_replicates[[1]][[i]]$reality_island
+  for (i in seq_along(island_replicates)) {
+    ideal_island_replicates[[i]] <- list()
+    reality_island_replicates[[i]] <- list()
+    for (j in seq_along(island_replicates[[i]])) {
+      ideal_island_replicates[[i]][[j]] <- island_replicates[[i]][[j]]$ideal_island
+      reality_island_replicates[[i]][[j]] <- island_replicates[[i]][[j]]$reality_island
+    }
   }
 
   ideal_islands <- DAISIE_format_mainland_ex_core(
@@ -26,11 +28,10 @@ DAISIE_format_mainland_ex <- function(island_replicates,
     M = M,
     verbose = verbose)
 
-  reality_islands <- DAISIE_format_CS(
+  reality_islands <- DAISIE_format_mainland_ex_core(
     island_replicates = reality_island_replicates,
     time = time,
     M = M,
-    sample_freq = sample_freq,
     verbose = verbose)
 
   return(list(ideal_islands = ideal_islands,
