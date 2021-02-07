@@ -74,6 +74,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
         if (number_colonisations == 1) {
           if (other_extant_mainland) {
             branching_time <- common_ancestor_time(
+              totaltime = totaltime,
               mainland_spec = mainland_spec,
               mainland = mainland)
             reality_island_clades_info[[i]] <- list(
@@ -81,7 +82,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
                 totaltime,
                 branching_time,
                 sort(
-                  as.numeric(island_spec[, "branching time (BP)"]),
+                  as.numeric(subset_island[, "branching time (BP)"]),
                   decreasing = TRUE)
                 ),
               stac = 2,
@@ -100,7 +101,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
                   totaltime,
                   totaltime - 1e-5,
                   sort(
-                    as.numeric(island_spec[, "branching time (BP)"]),
+                    as.numeric(subset_island[, "branching time (BP)"]),
                     decreasing = TRUE)
                 ),
                 stac = 6,
@@ -109,6 +110,10 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
           }
         } else {
           if (other_extant_mainland) {
+            branching_time <- common_ancestor_time(
+              totaltime = totaltime,
+              mainland_spec = mainland_spec,
+              mainland = mainland)
             reality_island_clades_info[[i]] <- list(
               branching_times = c(
                 totaltime,
@@ -121,7 +126,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
                 totaltime,
                 totaltime - 1e-5,
                 sort(
-                  as.numeric(island_spec[, "branching time (BP)"]),
+                  as.numeric(subset_island[, "branching time (BP)"]),
                   decreasing = TRUE)
               ),
               stac = 6,
