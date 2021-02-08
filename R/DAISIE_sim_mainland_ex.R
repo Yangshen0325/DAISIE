@@ -68,6 +68,7 @@ DAISIE_sim_mainland_ex <- function(
   M,
   island_pars,
   mainland_ext,
+  mainland_sample_prob,
   replicates,
   verbose = TRUE,
   ...
@@ -99,7 +100,8 @@ DAISIE_sim_mainland_ex <- function(
         time = totaltime,
         M = M,
         pars = island_pars,
-        mainland = mainland_replicates[[rep]][[m_spec]]
+        mainland = mainland_replicates[[rep]][[m_spec]],
+        mainland_sample_prob = mainland_sample_prob
       )
     }
     island_replicates[[rep]] <- full_list

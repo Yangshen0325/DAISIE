@@ -6,7 +6,8 @@ DAISIE_sim_core_mainland_ex <- function(
   time,
   M,
   pars,
-  mainland
+  mainland,
+  mainland_sample_prob
 ) {
 
   #### Initialization ####
@@ -144,6 +145,7 @@ DAISIE_sim_core_mainland_ex <- function(
     stt_table = stt_table,
     totaltime = totaltime,
     island_spec = island_spec,
-    mainland = mainland)
+    mainland = mainland,
+    mainland_sample_prob = mainland_sample_prob)
   return(island)
 }
