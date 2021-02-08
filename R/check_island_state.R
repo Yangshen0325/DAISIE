@@ -6,8 +6,7 @@
 check_island_state <- function(timeval,
                                totaltime,
                                island_spec,
-                               mainland,
-                               stt_table) {
+                               mainland) {
   if (any(island_spec[, 4] == "I")) {
     immig_spec <- island_spec[which(island_spec[, 4] == "I"), 1]
     mainland_ex_time <- mainland[which(mainland[, 1] %in% immig_spec), 9]
@@ -18,11 +17,6 @@ check_island_state <- function(timeval,
           "mainland_extinction"
       }
     }
-    stt_table[nrow(stt_table), 2:4] <- c(
-      length(which(island_spec[, 4] == "I")),
-      length(which(island_spec[, 4] == "A")),
-      length(which(island_spec[, 4] == "C")))
   }
-  return(list(island_spec = island_spec,
-              stt_table = stt_table))
+  return(island_spec)
 }
