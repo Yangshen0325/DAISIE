@@ -9,7 +9,8 @@
 DAISIE_create_island_mainland_ex <- function(stt_table,
                                              totaltime,
                                              island_spec,
-                                             mainland) {
+                                             mainland,
+                                             mainland_sample_prob) {
   ### if there are no species on the island branching_times = island_age,
   ### stac = 0, missing_species = 0
   if (length(island_spec[, 1]) == 0) {
@@ -38,8 +39,24 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
       island_spec[, "Mainland Ancestor"])))
     number_colonists_present <- length(colonists_present)
 
+    ### adjust mainland object for sampling probability
+    mainland <- sample_mainland(
+      totaltime = totaltime,
+      mainland = mainland,
+      mainland_sample_prob = mainland_sample_prob,
+      island_spec = island_spec)
+
+    island_spec <- check_island_state(
+      timeval = totaltime,
+      totaltime = totaltime,
+      island_spec = island_spec,
+      mainland = mainland,
+      stt_table = stt_table)
+
     ideal_island_clades_info <- list()
     reality_island_clades_info <- list()
+
+    browser()
 
     for (i in 1:number_colonists_present) {
       subset_island <- island_spec[which(island_spec[, "Mainland Ancestor"] ==
