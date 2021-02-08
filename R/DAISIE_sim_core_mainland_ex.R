@@ -28,9 +28,6 @@ DAISIE_sim_core_mainland_ex <- function(
   }
 
   island_spec <- c()
-  stt_table <- matrix(ncol = 4)
-  colnames(stt_table) <- c("Time", "nI", "nA", "nC")
-  stt_table[1, ] <- c(time, 0, 0, 0)
 
   lac <- pars[1]
   mu <- pars[2]
@@ -79,10 +76,7 @@ DAISIE_sim_core_mainland_ex <- function(
       island_state <- check_island_state(timeval = timeval,
                                          totaltime = totaltime,
                                          island_spec = island_spec,
-                                         mainland = mainland,
-                                         stt_table = stt_table)
-      island_spec <- island_state$island_spec
-      stt_table <- island_state$stt_table
+                                         mainland = mainland)
       num_spec <- length(island_spec[, 1])
       num_immigrants <- length(which(island_spec[, 4] == "I"))
 
@@ -130,19 +124,8 @@ DAISIE_sim_core_mainland_ex <- function(
       }
     }
   }
-  #### Finalize STT ####
-  stt_table <- rbind(
-    stt_table,
-    c(
-      0,
-      stt_table[nrow(stt_table), 2],
-      stt_table[nrow(stt_table), 3],
-      stt_table[nrow(stt_table), 4]
-    )
-  )
 
   island <- DAISIE_create_island_mainland_ex(
-    stt_table = stt_table,
     totaltime = totaltime,
     island_spec = island_spec,
     mainland = mainland,
