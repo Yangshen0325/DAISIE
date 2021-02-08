@@ -6,8 +6,7 @@
 #' branching times of extant species, status of species on
 #' the island and number of missing species.
 #' @keywords internal
-DAISIE_create_island_mainland_ex <- function(stt_table,
-                                             totaltime,
+DAISIE_create_island_mainland_ex <- function(totaltime,
                                              island_spec,
                                              mainland,
                                              mainland_sample_prob) {
@@ -15,8 +14,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
   ### stac = 0, missing_species = 0
   if (length(island_spec[, 1]) == 0) {
     ideal_island <- reality_island <-
-      list(stt_table = stt_table,
-           branching_times = totaltime,
+      list(branching_times = totaltime,
            stac = 0,
            missing_species = 0)
   } else {
@@ -50,8 +48,7 @@ DAISIE_create_island_mainland_ex <- function(stt_table,
       timeval = totaltime,
       totaltime = totaltime,
       island_spec = island_spec,
-      mainland = mainland,
-      stt_table = stt_table)
+      mainland = mainland)
 
     ideal_island_clades_info <- list()
     reality_island_clades_info <- list()
