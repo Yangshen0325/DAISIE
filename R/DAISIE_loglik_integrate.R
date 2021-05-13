@@ -232,6 +232,7 @@ integral_peak <- function(logfun,
     lower <- 0
     Q0 <- 0
   }
+  print(c("Q0 = ", Q0))
   Q1 <- stats::integrate(f = fun,
                          lower = lower,
                          upper = exp(xmax),
