@@ -13,6 +13,8 @@ on:
       - master
       - develop
       - onecolonist_fix
+  schedule:
+  - cron: "0 0 9 * *"
 
 name: R-CMD-check
 
