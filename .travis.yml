@@ -34,7 +34,7 @@ r_packages:
   - tidyr
 
 r_github_packages:
-  - jimhester/covr
+  - r-lib/covr
   - jimhester/lintr
 
 before_install:
